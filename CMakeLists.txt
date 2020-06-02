@@ -1,0 +1,6 @@
+project(advanced_C_standard_library)
+cmake_minimum_required(VERSION 3.0)
+include_directories(src)
+file(GLOB SOURCES "src/*.c")
+add_executable(test.out ${SOURCES})
+install(TARGETS DESTINATION ${CMAKE_SOURCE_DIR})

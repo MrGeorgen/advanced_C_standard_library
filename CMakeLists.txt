@@ -1,5 +1,5 @@
 project(advanced_C_standard_library C)
-set_property(GLOBAL PROPERTY C_STANDARD 99)
+set_property(GLOBAL PROPERTY C_STANDARD 11)
 cmake_minimum_required(VERSION 3.9)
 include_directories(src)
 file(GLOB SOURCES "src/*.c")

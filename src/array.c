@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 union arraylist_meta {
 	double dummy_double;
@@ -15,7 +16,7 @@ union arraylist_meta {
         };
 };
 
-void* arraylist_create(size_t array_size, size_t sizeof_one_element) {
+void* acl_arraylist_create(size_t array_size, size_t sizeof_one_element) {
 	union arraylist_meta *arraylist_new = malloc(array_size * sizeof_one_element + sizeof*arraylist_new);
 	arraylist_new->len = array_size;
 	arraylist_new->cap = array_size;
@@ -23,19 +24,14 @@ void* arraylist_create(size_t array_size, size_t sizeof_one_element) {
 	return arraylist_new+1;
 }
 
-void* arraylist_append(void *arraylist_void, void *element_void) {
-	char *element = element_void;
+void* acl_arraylist_append(void *arraylist_void, void *element) {
 	union arraylist_meta *arraylist = arraylist_void;
 	--arraylist;
 	if(arraylist->len == arraylist->cap) {
 		arraylist->cap = arraylist->len + 10;
 		arraylist = realloc(arraylist, arraylist->cap * arraylist->sizeof_one_element + sizeof *arraylist);
 	}
-	char *arraylist_char = (char*)(arraylist+1);
-	arraylist_char += arraylist->sizeof_one_element * arraylist->len;
-	for(size_t i = 0; i < arraylist->sizeof_one_element; ++arraylist_char, ++element, ++i) {
-		*arraylist_char = *element;
-	}
+	memcpy((char*)(arraylist + 1) + arraylist->sizeof_one_element * arraylist->len, element, arraylist->sizeof_one_element);
 	++arraylist->len;
 	return arraylist+1;
 }

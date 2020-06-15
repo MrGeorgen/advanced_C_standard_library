@@ -3,13 +3,17 @@
 #include <stdlib.h>
 
 union arraylist_meta {
-        max_align_t dummy_align;
+	double dummy_double;
+	long double dummy_long_double;
+	long long dummy_long_long;
+        void *dummy_ptr;
+        void (*dummy_func_ptr)(void);
         struct {
-            size_t len;
-            size_t cap;
-            size_t sizeof_one_element;
+        	size_t len;
+        	size_t cap;
+		size_t sizeof_one_element;
         };
-    };
+};
 
 void* arraylist_create(size_t array_size, size_t sizeof_one_element) {
 	union arraylist_meta *arraylist_new = malloc(array_size * sizeof_one_element + sizeof*arraylist_new);

@@ -1,7 +1,7 @@
 project(advanced_C_standard_library C)
 set_property(GLOBAL PROPERTY C_STANDARD)
 cmake_minimum_required(VERSION 3.9)
-include_directories("include")
+include_directories(include)
 file(GLOB SOURCES "src/*.c")
 add_executable(test.out ${SOURCES})
 find_program(CCACHE_PROGRAM ccache)

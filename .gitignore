@@ -66,3 +66,4 @@ CTestTestfile.cmake
 _deps
 # ---> Extra
 vgcore.*
+src/main.c

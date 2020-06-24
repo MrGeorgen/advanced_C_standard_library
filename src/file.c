@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
-char* acl_ReadTextFile(char *filePath, bool *sucess){
+char* acl_ReadTextFile(const char *filePath, bool *sucess){
 	FILE *fp = fopen(filePath, "rb");
 	size_t lSize;
 	char *buffer;

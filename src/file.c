@@ -20,9 +20,6 @@ char* acl_ReadTextFile(char *filePath, bool *sucess){
 	}
 	size_t readReturn = fread(buffer, lSize, 1, fp);
 	fclose(fp);
-	if(readReturn != 1) {
-		*sucess = false;
-	}
-	*sucess = true;
+	*sucess = readReturn == 1;
 	return buffer;
 }

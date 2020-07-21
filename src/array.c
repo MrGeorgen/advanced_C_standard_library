@@ -30,8 +30,27 @@ void* acl_arraylist_append(void *arraylist_void, void *element) {
 	if(arraylist->len == arraylist->cap) {
 		arraylist->cap = arraylist->len + 10;
 		arraylist = realloc(arraylist, arraylist->cap * arraylist->sizeof_one_element + sizeof *arraylist);
+		if(!arraylist) return NULL;
 	}
 	memcpy((char*)(arraylist + 1) + arraylist->sizeof_one_element * arraylist->len, element, arraylist->sizeof_one_element);
 	++arraylist->len;
 	return arraylist+1;
+}
+
+void acl_arraylist_free(void *arraylist) {
+	free((union arraylist_meta*)arraylist-1);
+}
+
+void* acl_arraylist_remove(void *arraylist_void, size_t index) {
+	union arraylist_meta *arraylist = (union arraylist_meta*)arraylist_void - 1;
+	char *arraylist_char = arraylist_void;
+	if(index != arraylist->len - 1) {
+		memcpy(arraylist_char + arraylist->sizeof_one_element * index, arraylist_char + arraylist->sizeof_one_element * (arraylist->len - 1), arraylist->sizeof_one_element);
+	}
+	--arraylist->len;
+	if(arraylist->len < arraylist->cap - 10) {
+		arraylist->cap = arraylist->len;
+		arraylist = realloc(arraylist, arraylist->cap * arraylist->sizeof_one_element + sizeof *arraylist);
+	}
+	return arraylist;
 }

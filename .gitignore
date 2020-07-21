@@ -67,3 +67,4 @@ _deps
 # ---> Extra
 vgcore.*
 src/main.c
+.clangd

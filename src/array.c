@@ -54,3 +54,7 @@ void* acl_arraylist_remove(void *arraylist_void, size_t index) {
 	}
 	return arraylist;
 }
+
+size_t acl_arraylist_len(void *arraylist) {
+	return ((union arraylist_meta*)arraylist - 1)->len;
+}

@@ -1,5 +1,5 @@
-#ifndef array_h
-#define array_h
+#ifndef _acl_array_h
+#define _acl_array_h
 #include <stddef.h>
 size_t acl_arraylist_len(void *arraylist);
 void acl_arraylist_free(void *arraylist);

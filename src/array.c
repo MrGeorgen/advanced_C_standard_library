@@ -28,7 +28,8 @@ void* acl_arraylist_append(void *arraylist_void, void *element) {
 	union arraylist_meta *arraylist = arraylist_void;
 	--arraylist;
 	if(arraylist->len == arraylist->cap) {
-		arraylist->cap = arraylist->len + 10;
+		if(arraylist->len > 10) arraylist->cap = arraylist->len + 10;
+		else arraylist->cap = arraylist->len * 2;
 		arraylist = realloc(arraylist, arraylist->cap * arraylist->sizeof_one_element + sizeof *arraylist);
 		if(!arraylist) return NULL;
 	}

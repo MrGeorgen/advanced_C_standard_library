@@ -6,4 +6,5 @@ void acl_arraylist_free(void *arraylist);
 void* acl_arraylist_remove(void *arraylist_void, size_t index);
 void* acl_arraylist_create(size_t array_size, size_t sizeof_one_element);
 void* acl_arraylist_append(void *arraylist_void, void *element_void);
+void* acl_arraylist_append_ptr(void *arraylist_void, void **append_element);
 #endif

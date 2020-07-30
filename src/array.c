@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <acl/array.h>
 
 union arraylist_meta {
 	double dummy_double;
@@ -25,17 +26,24 @@ void* acl_arraylist_create(size_t array_size, size_t sizeof_one_element) {
 }
 
 void* acl_arraylist_append(void *arraylist_void, void *element) {
+	void *append_pointer;
+	void **element_append = &append_pointer;
+	union arraylist_meta *arraylist = (union arraylist_meta*)acl_arraylist_append_ptr(arraylist_void, element_append) - 1;
+	memcpy(*element_append, element, arraylist->sizeof_one_element);
+	return arraylist + 1;
+}
+void* acl_arraylist_append_ptr(void *arraylist_void, void **append_element) {
 	union arraylist_meta *arraylist = arraylist_void;
 	--arraylist;
 	if(arraylist->len == arraylist->cap) {
 		if(arraylist->len > 10) arraylist->cap = arraylist->len + 10;
-		else arraylist->cap = arraylist->len * 2;
+		else arraylist->cap = arraylist->len * 2 + 1;
 		arraylist = realloc(arraylist, arraylist->cap * arraylist->sizeof_one_element + sizeof *arraylist);
 		if(!arraylist) return NULL;
 	}
-	memcpy((char*)(arraylist + 1) + arraylist->sizeof_one_element * arraylist->len, element, arraylist->sizeof_one_element);
+	*append_element = (char*)(arraylist + 1) + arraylist->sizeof_one_element * arraylist->len;
 	++arraylist->len;
-	return arraylist+1;
+	return arraylist + 1;
 }
 
 void acl_arraylist_free(void *arraylist) {

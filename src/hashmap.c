@@ -1,3 +1,12 @@
+#include <math.h>
+#include <acl/alignof.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <acl/hashmap.h>
+#include <acl/array.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdio.h>
 #ifdef ACL_LITTLE_ENDIAN
 #define LEFT_OR_RIGHT_SHIFT >>
 #else
@@ -7,13 +16,21 @@
 #error "endianiss not specified. make sure to properly add the cmake subdirectory."
 #endif
 #endif 
-#include <math.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <acl/hashmap.h>
-#include <acl/array.h>
-#include <stdint.h>
-#include <string.h>
+#define acl_hashVarLen(type)\
+	if(((uintptr_t)data & (alignof(type) - 1)) == 0) {\
+		printf(#type);\
+		type *src;\
+		for(uint64_t *keySrc = data; (char*)(keySrc + 1) <= dest; ++keySrc) {\
+			src = (type*)keySrc;\
+			for(type *hashValue_ptr = (type*)&hashValue; src < (type*)(keySrc + 1); ++src, ++hashValue_ptr) {\
+				*hashValue_ptr ^= *src;\
+			}\
+		}\
+		char *hash_char = (char*)&hashValue;\
+		for(char *i = (char*)src; i <= dest; ++i, ++hashValue) {\
+			*hash_char ^= *i;\
+		}\
+	}
 
 size_t acl_hash(void *data, size_t dataSize, size_t bucketBits) {
 	switch(dataSize) {
@@ -32,30 +49,20 @@ size_t acl_hash(void *data, size_t dataSize, size_t bucketBits) {
 			}
 		default:
 			if(dataSize <= 8) {
-				 uint64_t cache = 0;
-				 memcpy(&cache, data, dataSize);
-				 return (uint64_t)(10223372036854775833u * cache >> (64 - bucketBits));
-			 }
-			uint8_t rest = (uintptr_t)data % sizeof(uint64_t);
-			size_t data_len = dataSize / sizeof(uint64_t);
-			uint8_t restEnd = dataSize % sizeof(uint64_t);
-			if(restEnd) ++data_len;
-			uint64_t *cache;
-			if(rest) {
-				cache = malloc(data_len * sizeof *cache);
-				memcpy(cache, data, dataSize);
-				cache[data_len - 1] = 0;
+				uint64_t cache = 0;
+				memcpy(&cache, data, dataSize);
+				return (uint64_t)(10223372036854775833u * cache >> (64 - bucketBits));
 			}
-			else cache = data;
-			uint64_t hash = 0;
-			for(size_t i = 0; i < data_len - 1; ++i) { 
-				hash ^= (uint64_t)(10223372036854775833u * cache[i]);
-			}
-				hash ^= (uint64_t)(10223372036854775833u * cache[data_len - 1] & (18446744073709551615u LEFT_OR_RIGHT_SHIFT (sizeof *cache - restEnd)));
-				free(cache);
-				return hash >> (64 - bucketBits);
+			uint64_t hashValue = 0;
+			char * dest = (char*)data + dataSize - 1;
+			acl_hashVarLen(uint64_t)
+			else acl_hashVarLen(uint32_t)
+			else acl_hashVarLen(uint16_t)
+			else acl_hashVarLen(uint8_t)
+			return hashValue * 10223372036854775833u >> (64 - bucketBits);
 	}
 }
+
 union acl_hashmap_meta* acl_hashmap_create(size_t bucketCount, size_t sizeOneElement, size_t keySize) {
 	union acl_hashmap_meta *hashmap_meta = malloc(sizeof *hashmap_meta + bucketCount * sizeof(void*));
 	hashmap_meta->bucketCount = bucketCount;
@@ -74,6 +81,12 @@ void acl_hashmap_put(union acl_hashmap_meta *hashmap_meta, void *key, void *elem
 }
 #include <stdio.h>
 int main() {
-	int baum[3] = {89, 120, 36};
-	printf("Hash: %lu\n", acl_hash(baum, 3 * sizeof *baum , 5));
+	char baum[10] = {1};
+	char blau[10] = {1};
+	char green[10] = {1};
+	char w[10] = {1};
+	printf("Hash: %lu\n", acl_hash(baum, 9 * sizeof *baum , 5));
+	printf("Hash: %lu\n", acl_hash(blau, 9 * sizeof *baum , 5));
+	printf("Hash: %lu\n", acl_hash(green, 9 * sizeof *baum , 5));
+	printf("Hash: %lu\n", acl_hash(w, 9 * sizeof *baum , 5));
 }

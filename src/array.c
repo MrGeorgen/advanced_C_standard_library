@@ -42,7 +42,7 @@ void* acl_arraylist_append_ptr(void *arraylist_void, void **append_element) {
 		if(arraylist->len > 10) arraylist->cap = arraylist->len + 10;
 		else arraylist->cap = arraylist->len * 2 + 1;
 		arraylist = realloc(arraylist, arraylist->cap * arraylist->sizeof_one_element + sizeof *arraylist);
-		if(!arraylist) return NULL;
+		if(arraylist == NULL) return NULL;
 	}
 	*append_element = (char*)(arraylist + 1) + arraylist->sizeof_one_element * arraylist->len;
 	++arraylist->len;

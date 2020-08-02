@@ -7,18 +7,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
-#ifdef ACL_LITTLE_ENDIAN
-#define LEFT_OR_RIGHT_SHIFT >>
-#else
-#ifdef ACL_BIG_ENDIAN
-#define LEFT_OR_RIGHT_SHIFT <<
-#else
-#error "endianiss not specified. make sure to properly add the cmake subdirectory."
-#endif
-#endif 
 #define acl_hashVarLen(type)\
 	if(((uintptr_t)data & (alignof(type) - 1)) == 0) {\
-		printf(#type);\
 		type *src;\
 		for(uint64_t *keySrc = data; (char*)(keySrc + 1) <= dest; ++keySrc) {\
 			src = (type*)keySrc;\
@@ -79,14 +69,5 @@ void acl_hashmap_put(union acl_hashmap_meta *hashmap_meta, void *key, void *elem
 	void **hashmap_buckets = (void**)(hashmap_meta + 1);
 
 }
-#include <stdio.h>
 int main() {
-	char baum[10] = {1};
-	char blau[10] = {1};
-	char green[10] = {1};
-	char w[10] = {1};
-	printf("Hash: %lu\n", acl_hash(baum, 9 * sizeof *baum , 5));
-	printf("Hash: %lu\n", acl_hash(blau, 9 * sizeof *baum , 5));
-	printf("Hash: %lu\n", acl_hash(green, 9 * sizeof *baum , 5));
-	printf("Hash: %lu\n", acl_hash(w, 9 * sizeof *baum , 5));
 }

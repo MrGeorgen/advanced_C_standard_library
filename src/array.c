@@ -19,6 +19,7 @@ union arraylist_meta {
 
 void* acl_arraylist_create(size_t array_size, size_t sizeof_one_element) {
 	union arraylist_meta *arraylist_new = malloc(array_size * sizeof_one_element + sizeof*arraylist_new);
+	if(arraylist_new == NULL) return NULL;
 	arraylist_new->len = array_size;
 	arraylist_new->cap = array_size;
 	arraylist_new->sizeof_one_element = sizeof_one_element;
@@ -28,7 +29,9 @@ void* acl_arraylist_create(size_t array_size, size_t sizeof_one_element) {
 void* acl_arraylist_append(void *arraylist_void, void *element) {
 	void *append_pointer;
 	void **element_append = &append_pointer;
-	union arraylist_meta *arraylist = (union arraylist_meta*)acl_arraylist_append_ptr(arraylist_void, element_append) - 1;
+	union arraylist_meta *arraylist = acl_arraylist_append_ptr(arraylist_void, element_append);
+	if(arraylist == NULL) return NULL;
+	--arraylist;
 	memcpy(*element_append, element, arraylist->sizeof_one_element);
 	return arraylist + 1;
 }

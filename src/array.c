@@ -27,12 +27,11 @@ void* acl_arraylist_create(size_t array_size, size_t sizeof_one_element) {
 }
 
 void* acl_arraylist_append(void *arraylist_void, void *element) {
-	void *append_pointer;
-	void **element_append = &append_pointer;
-	union arraylist_meta *arraylist = acl_arraylist_append_ptr(arraylist_void, element_append);
+	void *element_append;
+	union arraylist_meta *arraylist = acl_arraylist_append_ptr(arraylist_void, &element_append);
 	if(arraylist == NULL) return NULL;
 	--arraylist;
-	memcpy(*element_append, element, arraylist->sizeof_one_element);
+	memcpy(element_append, element, arraylist->sizeof_one_element);
 	return arraylist + 1;
 }
 void* acl_arraylist_append_ptr(void *arraylist_void, void **append_element) {

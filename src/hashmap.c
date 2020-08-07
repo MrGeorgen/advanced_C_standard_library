@@ -21,11 +21,14 @@
 			*hash_char ^= *i;\
 		}\
 	}
-inline static void* acl_hashmap_elementFromBucketAndKey(void *bucket, void *key, union acl_hashmap_meta *hashmap_meta) {
-	char *i = bucket;
-	for(char *dest = bucket + acl_arraylist_len(bucket); i < dest; i += hashmap_meta->sizeOneElement) {
+static size_t acl_hash(void *data, size_t dataSize, size_t bucketBits);
+inline static void* acl_hashmap_elementFromBucketAndKey(void **bucket, void *key, union acl_hashmap_meta *hashmap_meta) {
+	void **hashmap_buckets = (void**)(hashmap_meta + 1);
+	*bucket = hashmap_buckets[acl_hash(key, hashmap_meta->keySize, hashmap_meta->bucketBits)];
+	char *i = *bucket;
+	for(char *dest = *bucket + acl_arraylist_len(*bucket); i < dest; i += hashmap_meta->sizeOneElement) {
 		if(!memcmp(key, i, hashmap_meta->keySize)) {
-			return i + hashmap_meta->offset;
+			return i;
 		}
 	}
 	return NULL;
@@ -81,14 +84,19 @@ union acl_hashmap_meta* acl_hashmap_init(size_t bucketCount, size_t sizeOneEleme
 	return hashmap_meta;
 }
 
-void* acl_hashmap_put(union acl_hashmap_meta *hashmap_meta, void *key) {
-	void **hashmap_buckets = (void**)(hashmap_meta + 1);
-	void *bucket = hashmap_buckets[acl_hash(key, hashmap_meta->keySize, hashmap_meta->bucketBits)];
-	if(acl_hashmap_elementFromBucketAndKey(bucket, key, hashmap_meta) != NULL) return NULL;
+void* acl_hashmap_declare(union acl_hashmap_meta *hashmap_meta, void *key) {
+	void *bucket;
+	if(acl_hashmap_elementFromBucketAndKey(&bucket, key, hashmap_meta) != NULL) return NULL;
 	void *elementKey; // pointer to the key inside the bucket
 	void *bucketTmp = acl_arraylist_append_ptr(bucket, &elementKey);
 	if(bucketTmp == NULL) return NULL;
 	bucket = bucketTmp;
 	memcpy(elementKey, key, hashmap_meta->keySize);
 	return (char*)elementKey + hashmap_meta->offset;
+}
+void* acl_hashmap_get(union acl_hashmap_meta *hashmap_meta, void *key) {
+	void *bucket;
+	char *elementKey = acl_hashmap_elementFromBucketAndKey(&bucket, key, hashmap_meta);
+	if(elementKey == NULL) return NULL;
+	return elementKey + hashmap_meta->offset;
 }

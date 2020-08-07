@@ -21,8 +21,17 @@
 			*hash_char ^= *i;\
 		}\
 	}
+inline static void* acl_hashmap_elementFromBucketAndKey(void *bucket, void *key, union acl_hashmap_meta *hashmap_meta) {
+	char *i = bucket;
+	for(char *dest = bucket + acl_arraylist_len(bucket); i < dest; i += hashmap_meta->sizeOneElement) {
+		if(!memcmp(key, i, hashmap_meta->keySize)) {
+			return i + hashmap_meta->offset;
+		}
+	}
+	return NULL;
+}
 
-size_t acl_hash(void *data, size_t dataSize, size_t bucketBits) {
+static size_t acl_hash(void *data, size_t dataSize, size_t bucketBits) {
 	switch(dataSize) {
 		case 1:
 			return (uint8_t)(101u * *(uint8_t*)data >> (8 - bucketBits));
@@ -53,21 +62,33 @@ size_t acl_hash(void *data, size_t dataSize, size_t bucketBits) {
 	}
 }
 
-union acl_hashmap_meta* acl_hashmap_create(size_t bucketCount, size_t sizeOneElement, size_t keySize) {
+union acl_hashmap_meta* acl_hashmap_init(size_t bucketCount, size_t sizeOneElement, size_t offset, size_t keySize) {
 	union acl_hashmap_meta *hashmap_meta = malloc(sizeof *hashmap_meta + bucketCount * sizeof(void*));
-	hashmap_meta->bucketCount = bucketCount;
+	hashmap_meta->bucketBits = log2(bucketCount);
 	hashmap_meta->sizeOneElement = sizeOneElement;
-	hashmap_meta->keyBits = log2(keySize);
+	hashmap_meta->keySize = keySize;
+	hashmap_meta->offset = offset;
 	void **hashmap_buckets = (void**)(hashmap_meta + 1);
-	for(size_t i; i < bucketCount; ++i) {
+	for(size_t i = 0; i < bucketCount; ++i) {
 		hashmap_buckets[i] = acl_arraylist_create(0, sizeOneElement);
+		if(hashmap_buckets[i] == NULL) {
+			for(size_t j = 0; j < i; ++j) {
+				acl_arraylist_free(hashmap_buckets[j]);
+			}
+			return NULL;
+		}
 	}
 	return hashmap_meta;
 }
 
-void acl_hashmap_put(union acl_hashmap_meta *hashmap_meta, void *key, void *element) {
+void* acl_hashmap_put(union acl_hashmap_meta *hashmap_meta, void *key) {
 	void **hashmap_buckets = (void**)(hashmap_meta + 1);
-
-}
-int main() {
+	void *bucket = hashmap_buckets[acl_hash(key, hashmap_meta->keySize, hashmap_meta->bucketBits)];
+	if(acl_hashmap_elementFromBucketAndKey(bucket, key, hashmap_meta) != NULL) return NULL;
+	void *elementKey; // pointer to the key inside the bucket
+	void *bucketTmp = acl_arraylist_append_ptr(bucket, &elementKey);
+	if(bucketTmp == NULL) return NULL;
+	bucket = bucketTmp;
+	memcpy(elementKey, key, hashmap_meta->keySize);
+	return (char*)elementKey + hashmap_meta->offset;
 }

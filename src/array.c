@@ -4,21 +4,9 @@
 #include <string.h>
 #include <acl/array.h>
 
-union arraylist_meta {
-	double dummy_double;
-	long double dummy_long_double;
-	long long dummy_long_long;
-        void *dummy_ptr;
-        void (*dummy_func_ptr)(void);
-        struct {
-        	size_t len;
-        	size_t cap;
-		size_t sizeof_one_element;
-        };
-};
-
+size_t acl_arraylist_len(void *arraylist);
 void* acl_arraylist_create(size_t array_size, size_t sizeof_one_element) {
-	union arraylist_meta *arraylist_new = malloc(array_size * sizeof_one_element + sizeof*arraylist_new);
+	union acl_arraylist_meta *arraylist_new = malloc(array_size * sizeof_one_element + sizeof*arraylist_new);
 	if(arraylist_new == NULL) return NULL;
 	arraylist_new->len = array_size;
 	arraylist_new->cap = array_size;
@@ -28,14 +16,14 @@ void* acl_arraylist_create(size_t array_size, size_t sizeof_one_element) {
 
 void* acl_arraylist_append(void *arraylist_void, void *element) {
 	void *element_append;
-	union arraylist_meta *arraylist = acl_arraylist_append_ptr(arraylist_void, &element_append);
+	union acl_arraylist_meta *arraylist = acl_arraylist_append_ptr(arraylist_void, &element_append);
 	if(arraylist == NULL) return NULL;
 	--arraylist;
 	memcpy(element_append, element, arraylist->sizeof_one_element);
 	return arraylist + 1;
 }
 void* acl_arraylist_append_ptr(void *arraylist_void, void **append_element) {
-	union arraylist_meta *arraylist = arraylist_void;
+	union acl_arraylist_meta *arraylist = arraylist_void;
 	--arraylist;
 	if(arraylist->len == arraylist->cap) {
 		if(arraylist->len > 10) arraylist->cap = arraylist->len + 10;
@@ -49,11 +37,11 @@ void* acl_arraylist_append_ptr(void *arraylist_void, void **append_element) {
 }
 
 void acl_arraylist_free(void *arraylist) {
-	free((union arraylist_meta*)arraylist-1);
+	free((union acl_arraylist_meta*)arraylist-1);
 }
 
 void* acl_arraylist_remove(void *arraylist_void, size_t index) {
-	union arraylist_meta *arraylist = (union arraylist_meta*)arraylist_void - 1;
+	union acl_arraylist_meta *arraylist = (union acl_arraylist_meta*)arraylist_void - 1;
 	char *arraylist_char = arraylist_void;
 	if(index != arraylist->len - 1) {
 		memcpy(arraylist_char + arraylist->sizeof_one_element * index, arraylist_char + arraylist->sizeof_one_element * (arraylist->len - 1), arraylist->sizeof_one_element);
@@ -64,8 +52,4 @@ void* acl_arraylist_remove(void *arraylist_void, size_t index) {
 		arraylist = realloc(arraylist, arraylist->cap * arraylist->sizeof_one_element + sizeof *arraylist);
 	}
 	return arraylist;
-}
-
-size_t acl_arraylist_len(void *arraylist) {
-	return ((union arraylist_meta*)arraylist - 1)->len;
 }

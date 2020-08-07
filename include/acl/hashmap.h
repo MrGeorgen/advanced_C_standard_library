@@ -1,15 +1,17 @@
 #ifndef _acl_hashmap_h
 #define _acl_hashmap_h
 #include <stddef.h>
+#include <stdbool.h>
+#define acl_hashmap_create(type, keyType, bucketCount) acl_hashmap_init(bucketCount, sizeof(struct{type c; type d;}), offsetof(struct{type c; type d;}, d), sizeof(keyType));
 union acl_hashmap_meta {
         void *dummy_ptr;
         struct {
-        	size_t bucketCount;
+        	size_t bucketBits;
         	size_t sizeOneElement;
-		size_t keyBits;
+		size_t keySize;
+		size_t offset;
         };
 };
-/* set keySize to NULL for a dynamic keySize */
-union acl_hashmap_meta* acl_hashmap_create(size_t bucketCount, size_t sizeOneElement, size_t keySize);
-void acl_hashmap_put(union acl_hashmap_meta *hashmap_meta, void *key, void *element);
+union acl_hashmap_meta* acl_hashmap_init(size_t bucketCount, size_t sizeOneElement, size_t offset, size_t keySize);
+void* acl_hashmap_put(union acl_hashmap_meta *hashmap_meta, void *key);
 #endif

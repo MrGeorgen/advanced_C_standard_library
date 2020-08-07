@@ -1,10 +1,10 @@
-#include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <acl/array.h>
 
 size_t acl_arraylist_len(void *arraylist);
+void acl_arraylist_free(void *arraylist);
 
 static inline void* acl_arraylist_resize(union acl_arraylist_meta *arraylist, int64_t relativLen) {
 	size_t cap = arraylist->cap + relativLen;
@@ -41,10 +41,6 @@ void* acl_arraylist_append_ptr(void *arraylist_void, void **append_element) {
 	*append_element = (char*)(arraylist + 1) + arraylist->sizeof_one_element * arraylist->len;
 	++arraylist->len;
 	return arraylist + 1;
-}
-
-void acl_arraylist_free(void *arraylist) {
-	free((union acl_arraylist_meta*)arraylist-1);
 }
 
 void* acl_arraylist_remove(void *arraylist_void, size_t index) {

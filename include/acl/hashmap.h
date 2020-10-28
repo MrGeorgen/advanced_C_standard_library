@@ -15,4 +15,5 @@ union acl_hashmap_meta {
 union acl_hashmap_meta* acl_hashmap_init(size_t bucketCount, size_t sizeOneElement, size_t offset, size_t keySize);
 void* acl_hashmap_declare(union acl_hashmap_meta *hashmap_meta, void *key);
 void* acl_hashmap_get(union acl_hashmap_meta *hashmap_meta, void *key);
+bool acl_hashmap_remove;
 #endif

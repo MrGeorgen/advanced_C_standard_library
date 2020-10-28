@@ -21,5 +21,6 @@ char* acl_ReadTextFile(const char *filePath, bool *sucess){
 	size_t readReturn = fread(buffer, lSize, 1, fp);
 	fclose(fp);
 	*sucess = readReturn == 1;
+	buffer[lSize] = '\0';
 	return buffer;
 }

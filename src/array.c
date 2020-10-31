@@ -35,7 +35,7 @@ void* acl_arraylist_append_ptr(void *arraylist_void, void **append_element) {
 	union acl_arraylist_meta *arraylist = arraylist_void;
 	--arraylist;
 	if(arraylist->len == arraylist->cap) {
-		acl_arraylist_resize(arraylist, 10);
+		arraylist = acl_arraylist_resize(arraylist, 10);
 		if(arraylist == NULL) return NULL;
 	}
 	*append_element = (char*)(arraylist + 1) + arraylist->sizeof_one_element * arraylist->len;

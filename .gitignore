@@ -68,4 +68,4 @@ _deps
 vgcore.*
 src/main.c
 .clangd
-./acl
+/acl

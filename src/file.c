@@ -1,25 +1,22 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
-char* acl_ReadTextFile(const char *filePath, bool *sucess){
-	FILE *fp = fopen(filePath, "rb");
+char* acl_ReadTextFile(FILE *file, bool *sucess){
 	size_t lSize;
 	char *buffer;
-	if(!fp) {
+	if(!file) {
 		*sucess = false;
 		return buffer;
 	}
-	fseek(fp, 0L, SEEK_END);
-	lSize = ftell(fp);
-	rewind(fp);
+	fseek(file, 0L, SEEK_END);
+	lSize = ftell(file);
+	rewind(file);
 	buffer = malloc(lSize + 1);
 	if(!buffer) {
-		fclose(fp);
 		*sucess = false;
 		return buffer;
 	}
-	size_t readReturn = fread(buffer, lSize, 1, fp);
-	fclose(fp);
+	size_t readReturn = fread(buffer, lSize, 1, file);
 	*sucess = readReturn == 1;
 	buffer[lSize] = '\0';
 	return buffer;
